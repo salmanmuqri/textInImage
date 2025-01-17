@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TextInImage</title>
+    <style>
+        :root {
+            --primary-color: #004E12;
+            --primary-light: #006617;
+            --primary-dark: #003b0e;
+            --accent-light: #e8f5e9;
+
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+            margin: 0 auto ;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #333;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 12px 30px;
+            background-color: #e9ecef;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            background-color: var(--primary-light);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 78, 18, 0.2);
+        }
+
+        .panel {
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .panel.active {
+            display: block;
+            opacity: 1;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background-color: white;
+            border: 2px dashed var(--primary-color);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        button:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 78, 18, 0.2);
+        }
+
+        #preview {
+            max-width: 100%;
+            margin: 15px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #text-input {
+                    width: 90%;
+                    height: auto;
+                }
+
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--accent-light);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-color);
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .image-preview-container {
+            text-align: center;
+            margin: 20px 0;
+            min-height: 100px;
+            width: 100%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>TextInImage</h1>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('encode')">Encode</button>
+            <button class="tab" onclick="switchTab('decode')">Decode</button>
+        </div>
+
+        <div id="encode-panel" class="panel active">
+            <div class="form-group">
+                <label for="image-input">Select Image:</label>
+                <input type="file" id="image-input" accept="image/*">
+            </div>
+            <div class="image-preview-container">
+                <img id="preview">
+            </div>
+            <div class="form-group">
+                <label for="text-input">Text to Hide:</label>
+                <textarea id="text-input" rows="4" placeholder="Enter your secret message here..."></textarea>
+            </div>
+            <button onclick="encodeImage()">Encode and Download</button>
+            <div id="encode-result" class="result"></div>
+        </div>
+
+        <div id="decode-panel" class="panel">
+            <div class="form-group">
+                <label for="decode-image-input">Select Encoded Image:</label>
+                <input type="file" id="decode-image-input" accept="image/*">
+            </div>
+            <button onclick="decodeImage()">Decode</button>
+            <div id="decode-result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            
+            const activeTab = document.querySelector(`.tab:nth-child(${tab === 'encode' ? '1' : '2'})`);
+            const activePanel = document.getElementById(`${tab}-panel`);
+            
+            activeTab.classList.add('active');
+            activePanel.classList.add('active');
+
+            if (tab === 'encode') {
+                document.getElementById('decode-result').style.display = 'none';
+                document.getElementById('decode-image-input').value = '';
+            } else {
+                document.getElementById('encode-result').style.display = 'none';
+                document.getElementById('image-input').value = '';
+                document.getElementById('text-input').value = '';
+                document.getElementById('preview').src = '';
+            }
+        }
+
+        function textToBinary(text) {
+            return text.split('').map(char => 
+                char.charCodeAt(0).toString(2).padStart(8, '0')
+            ).join('');
+        }
+
+        function binaryToText(binary) {
+            const bytes = binary.match(/.{1,8}/g) || [];
+            return bytes.map(byte => 
+                String.fromCharCode(parseInt(byte, 2))
+            ).join('');
+        }
+
+        document.getElementById('image-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.getElementById('preview');
+                    img.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function encodeImage() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = document.getElementById('preview');
+            const text = document.getElementById('text-input').value + '\0';
+            
+            if (!img.src) {
+                alert('Please select an image first');
+                return;
+            }
+
+            if (!text.trim()) {
+                alert('Please enter some text to hide');
+                return;
+            }
+
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const binaryMessage = textToBinary(text);
+            
+            if (binaryMessage.length > data.length * 3) {
+                alert('Text is too long for this image');
+                return;
+            }
+
+            let messageIndex = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                for (let j = 0; j < 3; j++) {
+                    if (messageIndex < binaryMessage.length) {
+                        data[i + j] = (data[i + j] & 254) | parseInt(binaryMessage[messageIndex]);
+                        messageIndex++;
+                    }
+                }
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            const originalFileName = document.getElementById('image-input').files[0].name;
+            const baseFileName = originalFileName.replace(/\.[^/.]+$/, '');
+            
+            canvas.toBlob((blob) => {
+                if ('showSaveFilePicker' in window) {
+                    const opts = {
+                        suggestedName: `${baseFileName}_encoded.png`,
+                        types: [{
+                            description: 'PNG Image',
+                            accept: {'image/png': ['.png']},
+                        }],
+                    };
+                    
+                    showSaveFilePicker(opts)
+                        .then(handle => handle.createWritable())
+                        .then(writable => {
+                            writable.write(blob)
+                                .then(() => writable.close())
+                                .then(() => {
+                                    const result = document.getElementById('encode-result');
+                                    result.style.display = 'block';
+                                    result.textContent = 'Image encoded and saved successfully!';
+                                    result.style.animation = 'none';
+                                    result.offsetHeight;
+                                    result.style.animation = null;
+                                });
+                        })
+                        .catch(err => {
+                            if (err.name !== 'AbortError') {
+                                console.error(err);
+                                fallbackDownload(blob, `${baseFileName}_encoded.png`);
+                            }
+                        });
+                } else {
+                    fallbackDownload(blob, `${baseFileName}_encoded.png`);
+                }
+            }, 'image/png');
+        }
+
+        function fallbackDownload(blob, fileName) {
+            const url = URL.createObjectURL(blob);
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
+            
+            const result = document.getElementById('encode-result');
+            result.style.display = 'block';
+            result.textContent = 'Image encoded and downloaded successfully!';
+            result.style.animation = 'none';
+            result.offsetHeight;
+            result.style.animation = null;
+        }
+
+        function decodeImage() {
+            const fileInput = document.getElementById('decode-image-input');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select an image to decode');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    let binaryMessage = '';
+
+                    for (let i = 0; i < data.length; i += 4) {
+                        for (let j = 0; j < 3; j++) {
+                            binaryMessage += data[i + j] & 1;
+                        }
+                    }
+
+                    let text = '';
+                    for (let i = 0; i < binaryMessage.length; i += 8) {
+                        const char = binaryToText(binaryMessage.substr(i, 8));
+                        if (char === '\0') break;
+                        text += char;
+                    }
+
+                    const result = document.getElementById('decode-result');
+                    result.style.display = 'block';
+                    result.t
+                    extContent = 'Decoded message: \n \n' + text;
+                    result.style.animation = 'none';
+                    result.offsetHeight; 
+                    result.style.animation = null;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+            HTMLUnknownElement
+    </script>
+</body>
+</html>
